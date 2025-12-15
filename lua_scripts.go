@@ -1,4 +1,4 @@
-package redis
+package redisx
 
 // Lua脚本常量定义
 // 基于Java代码中的RedisLuaScript类转换而来
