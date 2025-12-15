@@ -14,10 +14,10 @@
 
 ## 安装
 
-该包是项目内部共享包，直接导入即可：
+导入：
 
 ```go
-import "dramax.com/share/pkg/redis"
+import "github.com/xiaowen-17/go-redisx"
 ```
 
 ## 配置
@@ -93,3 +93,4 @@ if exists {
     manager.GetClient().Eval(ctx, script, []string{"key"})
 }
 ```
+
