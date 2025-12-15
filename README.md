@@ -1,6 +1,6 @@
 # Redis Client Package
 
-`go-redisx` 是一个基于 `go-redis/v9` 封装的企业级 Redis 客户端库，提供了统一的接口、健康检查、统计监控以及对多种 Redis 部署模式（单机、主从、集群）的支持。
+`go-redisx` 是一个基于 `go-redis/v9` 封装的 Redis 客户端库，提供了统一的接口、健康检查、统计监控以及对多种 Redis 部署模式（单机、主从、集群）的支持。
 
 ## 特性
 
@@ -14,8 +14,6 @@
 
 ## 安装
 
-导入：
-
 ```go
 import "github.com/xiaowen-17/go-redisx"
 ```
@@ -25,14 +23,14 @@ import "github.com/xiaowen-17/go-redisx"
 使用 `RedisConfig` 结构体进行配置：
 
 ```go
-config := &redis.RedisConfig{
-    Mode: redis.ModeSingle, // 或 ModeMasterSlave, ModeCluster
-    Single: redis.SingleConfig{
+config := &redisx.RedisConfig{
+    Mode: redisx.ModeSingle, // 或 ModeMasterSlave, ModeCluster
+    Single: redisx.SingleConfig{
         Addr:     "127.0.0.1:6379",
         Password: "",
         Database: 0,
     },
-    Common: redis.CommonConfig{
+    Common: redisx.CommonConfig{
         PoolSize:     100,
         MinIdleConns: 10,
         // ... 其他通用配置
@@ -45,7 +43,7 @@ config := &redis.RedisConfig{
 ### 初始化
 
 ```go
-manager, err := redis.NewRedisManager(config)
+manager, err := redisx.NewRedisManager(config)
 if err != nil {
     log.Fatal(err)
 }
@@ -93,4 +91,3 @@ if exists {
     manager.GetClient().Eval(ctx, script, []string{"key"})
 }
 ```
-
