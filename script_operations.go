@@ -39,6 +39,35 @@ func (rm *RedisManager) SafeIncr(key string, incr, max int64) CacheResult[int64]
 	return NewCacheResult(val)
 }
 
+// IncrWithLimitAndExpire 带上限和过期时间的原子性递增操作
+// 参数:
+//   - key: Redis键
+//   - incr: 递增值
+//   - max: 最大值上限
+//   - ttl: 过期时间
+//
+// 返回:
+//   - 成功: 递增后的新值
+//   - 失败: -1 表示已达上限，不再递增
+//
+// 特性:
+//   - 原子性: 检查、递增、设置过期时间在同一个 Lua 脚本中完成
+//   - 上限保证: 即使高并发也不会超过 max 值
+//   - 自动过期: 第一次递增时自动设置过期时间
+func (rm *RedisManager) IncrWithLimitAndExpire(key string, incr, max int64, ttl time.Duration) CacheResult[int64] {
+	result := rm.EvalScript(ScriptKeyIncrWithLimitAndExpire, []string{key}, incr, max, int64(ttl.Seconds()))
+	if !result.IsOK() {
+		return NewCacheError[int64](result.ErrCode, result.Err)
+	}
+
+	val, ok := result.Val.(int64)
+	if !ok {
+		return NewCacheError[int64](REDIS_INNER_ERROR, fmt.Errorf("unexpected return type"))
+	}
+
+	return NewCacheResult(val)
+}
+
 // SafeHIncr 安全Hash增值操作, 只有当前值小于最大值时才执行增操作
 func (rm *RedisManager) SafeHIncr(key string, field string, incr, max int64) CacheResult[int64] {
 	result := rm.EvalScript(ScriptKeyHIncr, []string{key, field}, incr, max)

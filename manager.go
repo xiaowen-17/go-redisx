@@ -69,6 +69,7 @@ type RedisClient interface {
 	ZRange(ctx context.Context, key string, start, stop int64) *redis.StringSliceCmd
 	ZRevRange(ctx context.Context, key string, start, stop int64) *redis.StringSliceCmd
 	ZRangeWithScores(ctx context.Context, key string, start, stop int64) *redis.ZSliceCmd
+	ZRevRangeWithScores(ctx context.Context, key string, start, stop int64) *redis.ZSliceCmd
 	ZScore(ctx context.Context, key, member string) *redis.FloatCmd
 	ZCard(ctx context.Context, key string) *redis.IntCmd
 	ZCount(ctx context.Context, key string, min, max string) *redis.IntCmd

@@ -1046,7 +1046,7 @@ func (rm *RedisManager) ZRevRangeWithScores(key string, start, stop int64) Cache
 		return NewCacheError[[]redis.Z](CONNECTION_FAILED, ErrConnectionFailed)
 	}
 
-	val, err := rm.client.ZRangeWithScores(rm.ctx, key, start, stop).Result()
+	val, err := rm.client.ZRevRangeWithScores(rm.ctx, key, start, stop).Result()
 	if err != nil {
 		rm.stats.IncrError()
 		return NewCacheError[[]redis.Z](REDIS_INNER_ERROR, err)

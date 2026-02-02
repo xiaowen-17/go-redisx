@@ -39,6 +39,9 @@ const (
 
 	// ScriptKeyMultiUnlock 多键解锁脚本的键名
 	ScriptKeyMultiUnlock = "multi_unlock_script"
+
+	// ScriptKeyIncrWithLimitAndExpire 带上限和过期时间的递增脚本键名
+	ScriptKeyIncrWithLimitAndExpire = "incr_with_limit_and_expire_script"
 )
 
 // Lua脚本内容定义
@@ -67,6 +70,35 @@ if cur < max then
 else
     return cur
 end`
+
+// IncrWithLimitAndExpireScript 带上限和过期时间的安全递增脚本
+// 参数: KEYS[1] = key, ARGV[1] = 增加的值, ARGV[2] = 最大值, ARGV[3] = 过期时间(秒)
+// 返回: -1 表示已达上限，正数表示递增后的新值
+const IncrWithLimitAndExpireScript = `
+local cur = tonumber(redis.call('get', KEYS[1]) or 0)
+local incr = tonumber(ARGV[1])
+local max = tonumber(ARGV[2])
+local ttl = tonumber(ARGV[3])
+
+-- 检查是否已达上限
+if cur >= max then
+    return -1  -- 返回 -1 表示已达上限
+end
+
+if cur + incr > max then
+    return -1  -- 返回 -1 表示已达上限
+end
+
+-- 执行递增
+local new_val = redis.call('incrby', KEYS[1], incr)
+
+-- 第一次递增时设置过期时间
+if new_val == incr then
+    redis.call('expire', KEYS[1], ttl)
+end
+
+return new_val  -- 返回新值
+`
 
 // HDecrScript 安全Hash减值脚本
 // 参数: KEYS[1] = key, KEYS[2] = field, ARGV[1] = 减少的值
@@ -248,6 +280,7 @@ func RegisterAllScripts(rm *RedisManager) {
 	rm.RegisterScript(ScriptKeyRenewLock, RenewLockScript)
 	rm.RegisterScript(ScriptKeyMultiLock, MultiLockScript)
 	rm.RegisterScript(ScriptKeyMultiUnlock, MultiUnlockScript)
+	rm.RegisterScript(ScriptKeyIncrWithLimitAndExpire, IncrWithLimitAndExpireScript)
 }
 
 func RegisterScripts(rm *RedisManager, scripts map[string]string) {
